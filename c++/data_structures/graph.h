@@ -20,10 +20,10 @@ class Edge {
   int weight_;
   std::pair<int, int> edge_;
 public:
-  Edge(int u, int v, int w = 0) : edge_(u, v), weight_(w) {};
+  Edge(const int& u, const int& v, const int& w = 0) : edge_(u, v), weight_(w) {};
   int weight() const { return weight_; };
   std::pair<int, int> endpoints() const { return edge_; };
-  int getOtherEndpoint(int x) const {
+  int getOtherEndpoint(const int& x) const {
     int u = edge_.first; int v = edge_.second;
     if (x == u) return v;
     else if (x == v) return u;
@@ -54,16 +54,16 @@ class Graph {
   NeighborSet neighbors_;
   IncidentEdgeSet incident_edges_;
 public:
-  void addVertex(int v);
-  void addEdge(int u, int v, int weight = 0);
-  VertexSet getNeighbors(int v);
-  EdgeSet getIncidentEdges(int v);
-  std::vector<int> shortestUnweightedPath(int u, int v);
-  Result shortestPath(int u, int v);
+  void addVertex(const int& v);
+  void addEdge(const int& u, const int& v, const int& weight = 0);
+  VertexSet getNeighbors(const int& v) const;
+  EdgeSet getIncidentEdges(const int& v) const;
+  std::vector<int> shortestUnweightedPath(const int& u, const int& v) const;
+  Result shortestPath(const int& u, const int& v) const;
   Graph minSpanningTree();
-  int weight();
+  int weight() const;
   
-  int numVertices() { return int(vertices_.size()); };
+  int numVertices() const { return int(vertices_.size()); };
 
   friend std::ostream & operator<<(std::ostream & os, const Graph & G);
 };

@@ -13,20 +13,24 @@ template <typename T>
 class UnionFind {
   std::map<T, T> parent_;
   std::map<T, int> sizes_;
-  T parent(T &t);
-  int size(T &t);
 
 public:
-  void makeSet(T &t);
-  T find(T &t);
-  void merge(T &t1, T &t2);
+  void makeSet(const T& t);
+  T find(const T& t);
+  int size(const T& t);
+  void merge(const T& t1, const T& t2);
 
   template <typename U>
-  friend std::ostream &operator<<(std::ostream &os, const UnionFind<U> &uf);
+  friend std::ostream &operator<<(std::ostream &os, const UnionFind<U>& uf);
+  
+private:
+  T& parent(T &t);
 };
 
+// MARK: - Public functions
+
 template<typename T>
-void UnionFind<T>::makeSet(T &t) {
+void UnionFind<T>::makeSet(const T &t) {
   auto it = parent_.find(t);
   if (it != parent_.end()) return; // t already exists
 
@@ -36,7 +40,7 @@ void UnionFind<T>::makeSet(T &t) {
 
 // Returns root containing element t.
 template<typename T>
-T UnionFind<T>::find(T &t) {
+T UnionFind<T>::find(const T &t) {
   // Check if t exists.
   if (parent_.find(t) == parent_.end())
     throw std::invalid_argument("Element t does not exist.");
@@ -57,8 +61,15 @@ T UnionFind<T>::find(T &t) {
   return root;
 }
 
+// Returns size of set containing t.
 template<typename T>
-void UnionFind<T>::merge(T &t1, T &t2) {
+int UnionFind<T>::size(const T& t) {
+  T root = find(t);
+  return sizes_[root];
+}
+
+template<typename T>
+void UnionFind<T>::merge(const T& t1, const T& t2) {
   T x_root = find(t1);
   T y_root = find(t2);
 
@@ -78,19 +89,7 @@ void UnionFind<T>::merge(T &t1, T &t2) {
 }
 
 template<typename T>
-T UnionFind<T>::parent(T &t) {
-  return parent_.find(t)->second;
-}
-
-// Returns size of set containing t.
-template<typename T>
-int UnionFind<T>::size(T &t) {
-  T root = find(t);
-  return sizes_[root];
-}
-
-template<typename T>
-std::ostream &operator<<(std::ostream &os, const UnionFind<T> &uf) {
+std::ostream &operator<<(std::ostream &os, const UnionFind<T>& uf) {
   std::map<T, std::vector<T>> trees;
   for (auto it : uf.parent_) {
     T child = it.first;
@@ -114,6 +113,13 @@ std::ostream &operator<<(std::ostream &os, const UnionFind<T> &uf) {
   }
 
   return os;
+}
+
+// MARK: - Private functions
+
+template<typename T>
+T& UnionFind<T>::parent(T& t) {
+  return parent_.find(t)->second;
 }
 
 #endif //DATA_STRUCTURES_UNION_FIND_H

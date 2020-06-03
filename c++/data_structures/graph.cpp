@@ -4,17 +4,17 @@
 
 #include "graph.h"
 
-const int kInf = std::numeric_limits<int>::max();
+constexpr int kInf = std::numeric_limits<int>::max();
 
 // MARK: - Modifiers
 
-void Graph::addVertex(int v) {
+void Graph::addVertex(const int& v) {
   vertices_.insert(v);
   std::unordered_set<int> n_v;
   neighbors_[v] = n_v;
 }
 
-void Graph::addEdge(int u, int v, int weight) {
+void Graph::addEdge(const int& u, const int& v, const int& weight) {
   Edge e(u, v, weight);
 
   auto itv = neighbors_.find(v);
@@ -38,7 +38,7 @@ void Graph::addEdge(int u, int v, int weight) {
 
 // MARK: - Accessors
 
-VertexSet Graph::getNeighbors(int v) {
+VertexSet Graph::getNeighbors(const int& v) const {
   auto it = neighbors_.find(v);
   if (it != neighbors_.end()) {
     return it->second;
@@ -47,7 +47,7 @@ VertexSet Graph::getNeighbors(int v) {
   }
 }
 
-EdgeSet Graph::getIncidentEdges(int v) {
+EdgeSet Graph::getIncidentEdges(const int& v) const {
   auto it = incident_edges_.find(v);
   if (it != incident_edges_.end()) {
     return it->second;
@@ -59,7 +59,7 @@ EdgeSet Graph::getIncidentEdges(int v) {
 // MARK: - Graph operations
 
 // Shortest unweighted path between u and v
-std::vector<int> Graph::shortestUnweightedPath(int u, int v) {
+std::vector<int> Graph::shortestUnweightedPath(const int& u, const int& v) const {
   // Use a queue to keep track of currently unexplored vertices.
   std::unordered_map<int, bool> seen;
   std::unordered_map<int, int> parent;
@@ -111,7 +111,7 @@ std::vector<int> Graph::shortestUnweightedPath(int u, int v) {
   return path;
 }
 
-Result Graph::shortestPath(int u, int v) {
+Result Graph::shortestPath(const int& u, const int& v) const {
   fib_heap<int, int> dist;
   std::unordered_map<int, int> parents;
   std::unordered_map<int, bool> seen;
@@ -200,7 +200,7 @@ Graph Graph::minSpanningTree() {
 
 // MARK: - Utility functions
 
-int Graph::weight() {
+int Graph::weight() const {
   int weight = 0;
   for (auto edge : edges_) {
     weight += edge.weight();

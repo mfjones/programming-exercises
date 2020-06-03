@@ -27,15 +27,15 @@ class CircularList {
 public:
   CircularList() : size_(0), node_(NULL) {};
   ~CircularList();
-  void insert(V value);
+  
+  void insert(const V& value);
   void insert(N* node);
-  void insertAfter(N* after_node, V value);
+  void insertAfter(N* after_node, const V& value);
   void insertAfter(N* after_node, N* node);
-  void remove(V value, bool free = true);
+  void remove(const V& value, bool free = true);
   void remove(N* node, bool free = true);
-  N* unlink(N* node);
-  void swap(N* n1, N* n2);
-  N* find(V value);
+  void swap(N* A, N* B);
+  N* find (const V& value) const;
   
   // Returns a pointer to an *arbitrary* node in the circular linked list.
   N* node() const { return node_; };
@@ -53,8 +53,10 @@ CircularList<V, N>::~CircularList() {
   }
 }
 
+// MARK: - Public functions
+
 template<typename V, typename N>
-void CircularList<V, N>::insert(V value) {
+void CircularList<V, N>::insert(const V& value) {
   // Is the list empty?
   if (empty()) {
     N* new_node = new N;
@@ -80,7 +82,7 @@ void CircularList<V, N>::insert(N* node) {
 }
 
 template<typename V, typename N>
-void CircularList<V, N>::insertAfter(N* after_node, V value) {
+void CircularList<V, N>::insertAfter(N* after_node, const V& value) {
   N* new_node = new N;
   new_node->value = value;
   insertAfter(after_node, new_node);
@@ -98,7 +100,7 @@ void CircularList<V, N>::insertAfter(N* after_node, N* node) {
 }
 
 template<typename V, typename N>
-void CircularList<V, N>::remove(V value, bool free) {
+void CircularList<V, N>::remove(const V& value, bool free) {
   remove(find(value), free);
 }
 
@@ -134,7 +136,7 @@ void CircularList<V, N>::remove(N* node, bool free) {
   return;
 }
 
-// Swaps located of two items in the circular list.
+// Swaps location of two items in a circular list.
 // See https://stackoverflow.com/a/27041055/1702220 for explanation.
 template<typename V, typename N>
 void CircularList<V, N>::swap(N* A, N* B) {
@@ -178,9 +180,9 @@ void CircularList<V, N>::swap(N* A, N* B) {
   B->right->left = B;
 }
 
-// Find a value in O(n) time.
+// Finds a value in O(n) time by a linear search.
 template<typename V, typename N>
-N* CircularList<V, N>::find(V value) {
+N* CircularList<V, N>::find(const V& value) const {
   N* curr = node_;
   for (int i = 0; i < size_; i++) {
     if (curr->value == value) {

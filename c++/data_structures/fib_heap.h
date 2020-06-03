@@ -45,11 +45,11 @@ class fib_heap {
   
 public:
   fib_heap() : size_(0), min_root_(NULL) {};
-  void insert(K key, V value);
+  void insert(const K& key, const V& value);
   std::pair<K, V> extractMin();
-  void decrease(K key, V newValue);
-  std::pair<K, V> remove(K key);
-  V getValue(K key);
+  void decrease(const K& key, const V& newValue);
+  std::pair<K, V> remove(const K& key);
+  V& getValue(const K& key) const;
   
   int size() const { return size_; };
   bool empty() const { return size_ == 0; };
@@ -62,13 +62,15 @@ public:
 private:
   void updateMin();
   void consolidate();
-  void link(FibNode<K, V>* fn1, FibNode<K, V>* fn2);
+  void link(FibNode<K, V>* par, FibNode<K, V>* child);
   void cut(FibNode<K, V>* par, FibNode<K, V>* child);
   void cascadingCut(FibNode<K, V>* node);
 };
 
+// MARK: - Public functions
+
 template<typename K, typename V>
-void fib_heap<K, V>::insert(K key, V value) {
+void fib_heap<K, V>::insert(const K& key, const V& value) {
   // Construct new node.
   FibNode<K, V>* node = new FibNode<K, V>;
   node->key = key;
@@ -133,51 +135,7 @@ std::pair<K, V> fib_heap<K, V>::extractMin() {
 }
 
 template<typename K, typename V>
-void fib_heap<K, V>::consolidate() {
-  std::vector<FibNode<K, V>*> A(size_);
-  FibNode<K, V>* curr = roots_.node();
-  
-  // Consolidate all nodes with the same degree.
-  int num_roots = roots_.size();
-  while (num_roots > 0) {
-    int deg = curr->degree();
-    while (A[deg] != NULL) {
-      // The other node with the same degree as curr.
-      FibNode<K, V>* other = A[deg];
-      if (other->value < curr->value) {
-        // Swap the keys in place so we don't lose our position in the iterator.
-        // Then attach larger node as child to smaller node.
-        roots_.swap(other, curr);
-        link(curr, other);
-        curr = other;
-      } else {
-        link(other, curr);
-      }
-      A[deg] = NULL;
-      deg++;
-    }
-    
-    // "curr" now has degree deg.
-    A[deg] = curr;
-    
-    curr = curr->right;
-    num_roots--;
-  }
-}
-
-// Links child to par, assuming both were originally in the
-// root list.
-template<typename K, typename V>
-void fib_heap<K, V>::link(FibNode<K, V>* child, FibNode<K, V>* par) {
-  // Remove from roots list and capture ptr.
-  roots_.remove(child, false);
-  par->children.insert(child);
-  child->par = par;
-  child->mark = false;
-}
-
-template<typename K, typename V>
-void fib_heap<K, V>::decrease(K key, V newValue) {
+void fib_heap<K, V>::decrease(const K& key, const V& newValue) {
   auto it = map_.find(key);
   if (it == map_.end()) return;
   
@@ -195,31 +153,8 @@ void fib_heap<K, V>::decrease(K key, V newValue) {
   updateMin();
 }
 
-// Remove "child" from the child list of "par" and add "child" to the
-// root list.
 template<typename K, typename V>
-void fib_heap<K, V>::cut(FibNode<K, V>* par, FibNode<K, V>* child) {
-  par->children.remove(child, false);
-  roots_.insert(child);
-  child->par = NULL;
-  child->mark = false;
-}
-
-template<typename K, typename V>
-void fib_heap<K, V>::cascadingCut(FibNode<K, V>* node) {
-  FibNode<K, V>* par = node->par;
-  if (par == NULL) return;
-  
-  if (!node->mark) {
-    node->mark = true;
-  } else {
-    cut(par, node);
-    cascadingCut(par);
-  }
-}
-
-template<typename K, typename V>
-std::pair<K, V> fib_heap<K, V>::remove(K key) {
+std::pair<K, V> fib_heap<K, V>::remove(const K& key) {
   auto it = map_.find(key);
   if (it == map_.end()) return;
   
@@ -229,19 +164,7 @@ std::pair<K, V> fib_heap<K, V>::remove(K key) {
 }
 
 template<typename K, typename V>
-void fib_heap<K, V>::updateMin() {
-  FibNode<K, V>* curr = roots_.node();
-  min_root_ = curr;
-  for (int i = 0; i < roots_.size(); i++) {
-    if (curr->value < min_root_->value) {
-      min_root_ = curr;
-    }
-    curr = curr->right;
-  }
-}
-
-template<typename K, typename V>
-V fib_heap<K, V>::getValue(K key) {
+V& fib_heap<K, V>::getValue(const K& key) const {
   auto it = map_.find(key);
   if (it == map_.end()) {
     throw std::invalid_argument(std::to_string(key) + " does not exist in heap!");
@@ -265,7 +188,8 @@ std::ostream& operator<<(std::ostream& os, const fib_heap<K, V>& fh) {
   
   while (!nodes.empty()) {
     curr = nodes.top(); nodes.pop();
-    os << "(" << curr->key << ", " << curr->value << "; " << curr->degree() << "; ";
+    os << "(" << curr->key << ", " << curr->value
+       << "; " << curr->degree() << "; ";
     if (curr->par) {
       os << curr->par->key;
     } else {
@@ -285,6 +209,87 @@ std::ostream& operator<<(std::ostream& os, const fib_heap<K, V>& fh) {
   }
   
   return os;
+}
+
+// MARK: - Private functions
+
+template<typename K, typename V>
+void fib_heap<K, V>::updateMin() {
+  FibNode<K, V>* curr = roots_.node();
+  min_root_ = curr;
+  for (int i = 0; i < roots_.size(); i++) {
+    if (curr->value < min_root_->value) {
+      min_root_ = curr;
+    }
+    curr = curr->right;
+  }
+}
+
+template<typename K, typename V>
+void fib_heap<K, V>::consolidate() {
+  std::vector<FibNode<K, V>*> A(size_);
+  FibNode<K, V>* curr = roots_.node();
+  
+  // Consolidate all nodes with the same degree.
+  int num_roots = roots_.size();
+  while (num_roots > 0) {
+    int deg = curr->degree();
+    while (A[deg] != NULL) {
+      // The other node with the same degree as curr.
+      FibNode<K, V>* other = A[deg];
+      if (other->value < curr->value) {
+        // Swap the keys in place so we don't lose our position in the iterator.
+        // Then attach larger node as child to smaller node.
+        roots_.swap(other, curr);
+        link(other, curr);
+        curr = other;
+      } else {
+        link(curr, other);
+      }
+      A[deg] = NULL;
+      deg++;
+    }
+    
+    // "curr" now has degree deg.
+    A[deg] = curr;
+    
+    curr = curr->right;
+    num_roots--;
+  }
+}
+
+// Assuming "child" and "par" were root nodes, adds "child" to child list of "par",
+// removes "child" from root list, and sets parent of "child" to "par".
+template<typename K, typename V>
+void fib_heap<K, V>::link(FibNode<K, V>* par, FibNode<K, V>* child) {
+  // Remove from roots list and capture ptr.
+  roots_.remove(child, false);
+  par->children.insert(child);
+  child->par = par;
+  child->mark = false;
+}
+
+// Remove "child" from the child list of "par" and add "child" to the
+// root list.
+template<typename K, typename V>
+void fib_heap<K, V>::cut(FibNode<K, V>* par, FibNode<K, V>* child) {
+  par->children.remove(child, false);
+  roots_.insert(child);
+  child->par = NULL;
+  child->mark = false;
+}
+
+template<typename K, typename V>
+void fib_heap<K, V>::cascadingCut(FibNode<K, V>* node) {
+  FibNode<K, V>* par = node->par;
+  if (par == NULL) return;
+  
+  if (!node->mark) {
+    node->mark = true;
+  } else {
+    cut(par, node);
+    cascadingCut(par);
+  }
 }
 
 #endif /* fib_heap_h */
