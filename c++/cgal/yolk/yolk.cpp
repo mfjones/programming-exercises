@@ -1,6 +1,5 @@
-//! \file examples/Arrangement_on_surface_2/dual_lines.cpp
-// Checking whether there are three collinear points in a given input set
-// using the arrangement of the dual lines.
+// Computes the extremal yolk of a point set. See this paper:
+// https://arxiv.org/abs/1912.01639
 
 #include <CGAL/Cartesian.h>
 #include <CGAL/Exact_rational.h>
@@ -145,7 +144,7 @@ int main(int argc, char *argv[])
   Solution s = CGAL::solve_quadratic_program(lp, ET());
   Solution::Variable_value_iterator vals = s.variable_values_begin();
 
-  // Draw disk.
+  // Output disk.
   double sq_radius = CGAL::to_double(
       CGAL::square(s.objective_value())
     );

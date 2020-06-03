@@ -15,7 +15,7 @@ structures in both Java and C++.
 
 - [Fibonacci heap](c++/data_structures/fib_heap.h)
 - [Union find](c++/data_structures/union_find.h)
-- [Undirected graph](c++/graph.cpp)
-- I've also recently been playing around with [CGAL](https://www.cgal.org/).
-  - I am following the exercises in (this book)[https://www.springer.com/gp/book/9783642172823], see (my solutions)[c++/cgal/cgal_book]
+- [Undirected graph](c++/data_structures/graph.cpp)
+- I've also recently been playing around with [CGAL](https://www.cgal.org/):
+  - I am following the exercises in [this book](https://www.springer.com/gp/book/9783642172823) to learn how to develop with CGAL, see [my solutions](c++/cgal/cgal_book).
   - For practice, implemented the brute-force algorithm for computing the extremal yolk for a point set (see my paper [Fast Algorithms for Geometry Consensuses](https://arxiv.org/abs/1912.01639)). See implementation [here](c++/cgal/yolk/yolk.cpp).
