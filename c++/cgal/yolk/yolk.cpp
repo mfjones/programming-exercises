@@ -7,9 +7,8 @@
 #include <CGAL/QP_models.h>
 #include <CGAL/QP_functions.h>
 #include <CGAL/number_utils.h>
-#include <cstdlib>
 
-#include <math.h>
+#include <cmath>
 
 // choose exact integral type
 #ifdef CGAL_USE_GMP

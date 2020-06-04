@@ -5,3 +5,5 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(data_structures)
 add_subdirectory(tests)
+add_subdirectory(cgal/yolk)
+add_subdirectory(cgal/cgal_book/ex_2_1)
