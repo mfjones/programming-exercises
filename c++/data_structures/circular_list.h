@@ -1,6 +1,6 @@
 //
 //  circular_list.h
-//  data_structures_xc
+//  data_structures
 //
 //  Created by Mitchell Jones on 6/2/20.
 //  Copyright © 2020 Mitchell Jones. All rights reserved.
@@ -132,8 +132,6 @@ void CircularList<V, N>::remove(N* node, bool free) {
   }
   
   if (free) delete node;
-  
-  return;
 }
 
 // Swaps location of two items in a circular list.
@@ -161,7 +159,7 @@ void CircularList<V, N>::swap(N* A, N* B) {
   swap_vec[3] = B->right;
 
   // Test if A and B are neighbors.
-  if ((A->right == B && B->left == A) || (A->right == B && B->left == A)) {
+  if ((A->right == B && B->left == A) || (A->left == B && B->right == A)) {
     A->left = swap_vec[2];
     B->left = swap_vec[0];
     A->right = swap_vec[3];

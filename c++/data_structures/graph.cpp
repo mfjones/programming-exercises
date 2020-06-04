@@ -112,7 +112,7 @@ std::vector<int> Graph::shortestUnweightedPath(const int& u, const int& v) const
 }
 
 Result Graph::shortestPath(const int& u, const int& v) const {
-  fib_heap<int, int> dist;
+  FibHeap<int, int> dist;
   std::unordered_map<int, int> parents;
   std::unordered_map<int, bool> seen;
 

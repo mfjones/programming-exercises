@@ -1,6 +1,6 @@
 //
 //  fib_heap.h
-//  data_structures_xc
+//  data_structures
 //
 //  Created by Mitchell Jones on 6/2/20.
 //  Copyright © 2020 Mitchell Jones. All rights reserved.
@@ -35,7 +35,7 @@ struct FibNode {
 };
 
 template<typename K, typename V>
-class fib_heap {
+class FibHeap {
   CircularList<V, FibNode<K, V>> roots_;
   FibNode<K, V>* min_root_;
   std::map<K, FibNode<K, V>*> map_;
@@ -44,7 +44,7 @@ class fib_heap {
   const int kNegInf = std::numeric_limits<V>::min();
   
 public:
-  fib_heap() : size_(0), min_root_(NULL) {};
+  FibHeap() : size_(0), min_root_(NULL) {};
   void insert(const K& key, const V& value);
   std::pair<K, V> extractMin();
   void decrease(const K& key, const V& newValue);
@@ -57,7 +57,7 @@ public:
   K minKey() const { return min_root_->key; };
   
   template<typename U, typename S>
-  friend std::ostream& operator<<(std::ostream& os, const fib_heap<U, S>& fh);
+  friend std::ostream& operator<<(std::ostream& os, const FibHeap<U, S>& fh);
   
 private:
   void updateMin();
@@ -70,9 +70,9 @@ private:
 // MARK: - Public functions
 
 template<typename K, typename V>
-void fib_heap<K, V>::insert(const K& key, const V& value) {
+void FibHeap<K, V>::insert(const K& key, const V& value) {
   // Construct new node.
-  FibNode<K, V>* node = new FibNode<K, V>;
+  auto* node = new FibNode<K, V>;
   node->key = key;
   node->value = value;
   node->par = NULL;
@@ -82,21 +82,19 @@ void fib_heap<K, V>::insert(const K& key, const V& value) {
   roots_.insert(node);
   
   // Update min_root ptr if necessary.
-  if (size_ == 0) {
-    min_root_ = node;
-  } else if (value < min_root_->value) {
+  if (size_ == 0 || value < min_root_->value) {
     min_root_ = node;
   }
   size_++;
-  
+
   // Insert into map for efficient access.
   map_.insert({key, node});
 }
 
 template<typename K, typename V>
-std::pair<K, V> fib_heap<K, V>::extractMin() {
+std::pair<K, V> FibHeap<K, V>::extractMin() {
   if (size() == 0) {
-    throw new std::out_of_range("The heap is empty!");
+    throw std::out_of_range("The heap is empty!");
   }
   
   // Remove the min from the roots list and capture the ptr.
@@ -135,7 +133,7 @@ std::pair<K, V> fib_heap<K, V>::extractMin() {
 }
 
 template<typename K, typename V>
-void fib_heap<K, V>::decrease(const K& key, const V& newValue) {
+void FibHeap<K, V>::decrease(const K& key, const V& newValue) {
   auto it = map_.find(key);
   if (it == map_.end()) return;
   
@@ -154,17 +152,22 @@ void fib_heap<K, V>::decrease(const K& key, const V& newValue) {
 }
 
 template<typename K, typename V>
-std::pair<K, V> fib_heap<K, V>::remove(const K& key) {
+std::pair<K, V> FibHeap<K, V>::remove(const K& key) {
   auto it = map_.find(key);
-  if (it == map_.end()) return;
+  if (it == map_.end()) {
+    throw std::invalid_argument(std::to_string(key) + " does not exist in heap!");
+  }
   
   // Decrease key to cost -infinty, and extract it.
+  std::pair<K, V> pr = {key, it->second->value};
   decrease(key, kNegInf);
-  return extractMin();
+  extractMin();
+  
+  return pr;
 }
 
 template<typename K, typename V>
-V& fib_heap<K, V>::getValue(const K& key) const {
+V& FibHeap<K, V>::getValue(const K& key) const {
   auto it = map_.find(key);
   if (it == map_.end()) {
     throw std::invalid_argument(std::to_string(key) + " does not exist in heap!");
@@ -173,7 +176,7 @@ V& fib_heap<K, V>::getValue(const K& key) const {
 }
 
 template<typename K, typename V>
-std::ostream& operator<<(std::ostream& os, const fib_heap<K, V>& fh) {
+std::ostream& operator<<(std::ostream& os, const FibHeap<K, V>& fh) {
   if (fh.roots_.empty()) {
     os << "Empty";
     return os;
@@ -214,7 +217,7 @@ std::ostream& operator<<(std::ostream& os, const fib_heap<K, V>& fh) {
 // MARK: - Private functions
 
 template<typename K, typename V>
-void fib_heap<K, V>::updateMin() {
+void FibHeap<K, V>::updateMin() {
   FibNode<K, V>* curr = roots_.node();
   min_root_ = curr;
   for (int i = 0; i < roots_.size(); i++) {
@@ -226,7 +229,7 @@ void fib_heap<K, V>::updateMin() {
 }
 
 template<typename K, typename V>
-void fib_heap<K, V>::consolidate() {
+void FibHeap<K, V>::consolidate() {
   std::vector<FibNode<K, V>*> A(size_);
   FibNode<K, V>* curr = roots_.node();
   
@@ -261,7 +264,7 @@ void fib_heap<K, V>::consolidate() {
 // Assuming "child" and "par" were root nodes, adds "child" to child list of "par",
 // removes "child" from root list, and sets parent of "child" to "par".
 template<typename K, typename V>
-void fib_heap<K, V>::link(FibNode<K, V>* par, FibNode<K, V>* child) {
+void FibHeap<K, V>::link(FibNode<K, V>* par, FibNode<K, V>* child) {
   // Remove from roots list and capture ptr.
   roots_.remove(child, false);
   par->children.insert(child);
@@ -272,7 +275,7 @@ void fib_heap<K, V>::link(FibNode<K, V>* par, FibNode<K, V>* child) {
 // Remove "child" from the child list of "par" and add "child" to the
 // root list.
 template<typename K, typename V>
-void fib_heap<K, V>::cut(FibNode<K, V>* par, FibNode<K, V>* child) {
+void FibHeap<K, V>::cut(FibNode<K, V>* par, FibNode<K, V>* child) {
   par->children.remove(child, false);
   roots_.insert(child);
   child->par = NULL;
@@ -280,7 +283,7 @@ void fib_heap<K, V>::cut(FibNode<K, V>* par, FibNode<K, V>* child) {
 }
 
 template<typename K, typename V>
-void fib_heap<K, V>::cascadingCut(FibNode<K, V>* node) {
+void FibHeap<K, V>::cascadingCut(FibNode<K, V>* node) {
   FibNode<K, V>* par = node->par;
   if (par == NULL) return;
   
