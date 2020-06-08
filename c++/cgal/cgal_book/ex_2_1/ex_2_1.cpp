@@ -1,3 +1,8 @@
+//
+// Created by Mitchell Jones on 20/4/20.
+// Exercise 2.1 in CGAL Arrangements and Their Applications, Fogel et. al.
+//
+
 #include "arr_inexact_construction_segments.h"
 #include "arr_print.h"
 #include "point_in_face.h"
