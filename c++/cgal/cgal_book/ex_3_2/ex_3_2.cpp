@@ -13,6 +13,7 @@
 
 typedef CGAL::Arr_walk_along_line_point_location<Arrangement> Walk_pl;
 
+// Rotates a point p about the origin by a given angle.
 Point rotatePoint(const Point& p, double angle) {
   double x = CGAL::to_double(p.x());
   double y = CGAL::to_double(p.y());
@@ -32,7 +33,9 @@ std::list<Segment> rotateSegments(const std::list<Segment>& segments, double ang
   return rotated_segments;
 }
 
-void shoot_vertical_ray(const Walk_pl& pl, const Point& q, double angle) {
+// Shoots a vertical ray in an arrangement rotated by the given angle.
+// Outputs the given object hit after applying the inverse rotation.
+void shootRay(const Walk_pl& pl, const Point& q, double angle) {
   typename Arrangement::Vertex_const_handle    v;
   typename Arrangement::Halfedge_const_handle  e;
   typename Arrangement::Face_const_handle      f;
@@ -71,6 +74,11 @@ void shoot_vertical_ray(const Walk_pl& pl, const Point& q, double angle) {
 int main() {
   const char* filename = "segments.dat";
 
+  // Read in:
+  // 1. The direction in which to shoot ray queries,
+  // 2. The error bound on the angle approximation.
+  // 3. THe collection of segments in the arrangement.
+  // 4. The collection of query points.
   std::ifstream is;
   if (!open_stream(is, filename)) exit(1);
 
@@ -101,17 +109,15 @@ int main() {
   }
   close_stream(is);
 
-  double alpha = std::atan(CGAL::to_double(dir.y()/dir.x()));
-  double beta = M_PI_2 - alpha;
+  // Approximate the angle.
+  Number_type sin_alpha, cos_alpha, denom;
+  CGAL::rational_rotation_approximation<Number_type>(dir.x(), dir.y(), sin_alpha, cos_alpha, denom, error, 1);
+  double apx_angle = M_PI_2 - asin(CGAL::to_double(sin_alpha / denom));
 
-  Number_type sin_beta, cos_beta, denom;
-  CGAL::rational_rotation_approximation<Number_type>(beta, sin_beta, cos_beta, denom, error, 1);
-  double beta_apx = asin(CGAL::to_double(sin_beta/denom));
+  std::cout << "Ray shooting with angle of direction " << apx_angle << std::endl << std::endl;
 
-  std::cout << "Ray shooting with angle of direction " << beta
-            << " (using approx. value " << beta_apx << ")" << std::endl << std::endl;
-
-  std::list<Segment> rotated_segments = rotateSegments(segments, beta_apx);
+  // Rotate the arrangement and perform the queries.
+  std::list<Segment> rotated_segments = rotateSegments(segments, apx_angle);
 
   Traits traits;
   Arrangement arr(&traits);
@@ -124,7 +130,7 @@ int main() {
 
   Walk_pl walk_pl(arr);
   for (const Point& query : query_points) {
-    shoot_vertical_ray(walk_pl, query, beta_apx);
+    shootRay(walk_pl, query, apx_angle);
   }
 }
 
