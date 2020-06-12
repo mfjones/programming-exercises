@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 
 #include "circular_list.h"
 #include "fib_heap.h"
@@ -33,18 +32,18 @@ int main() {
   G.addEdge(5,4,10);
 
   Graph MST = G.minSpanningTree();
-  cout << endl << "G has MST of weight " << MST.weight() << endl;
-  cout << MST << "\n\n";
+  cout << "G has MST of weight " << MST.weight() << endl;
+  cout << MST << endl << endl;
 
   vector<int> path = G.shortestUnweightedPath(0, 4);
   cout << "Shortest (unweighted) path from 0 to 4 has vertices: ";
   print_v(path);
-  cout << "\n\n";
+  cout << endl << endl;
 
   Result r = G.shortestPath(0, 4);
   cout << "Minimum weight path from 0 to 4 has vertices: ";
   print_v(r.path);
-  cout << "..with weight " << r.weight << endl << endl;
+  cout << "..with weight " << r.weight << endl;
 
   return 0;
 }
