@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.1...3.15)
 
-project( Yolk )
+project( Centerpoint )
 
 
 # CGAL and its components
